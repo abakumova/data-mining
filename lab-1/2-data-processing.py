@@ -3,6 +3,7 @@ import re
 from collections import Counter
 import os
 import nltk
+import logging
 from nltk.corpus import stopwords
 
 nltk.download('stopwords')
@@ -24,6 +25,7 @@ porter = PorterStemmer()
 
 
 def csv_dict_reader(file_obj):
+    logging.info('Returning csv reader')
     return csv.DictReader(file_obj, delimiter=',')
 
 
@@ -32,22 +34,27 @@ def processor_line(line):
     line = remove_symbols(line)
     line = line.lower()
     line = remove_stop_words(line)
+    logging.info('Processing the line')
     return str(line)
 
 
 def remove_digits(line):
+    logging.info('Removing digits')
     return re.sub(DIGITS_REGEX, '', line)
 
 
 def remove_symbols(line):
+    logging.info('Removing symbols')
     return re.sub(SYMBOLS_REGEX, '', line)
 
 
 def remove_stop_words(line):
+    logging.info('Removing stop words')
     return [word for word in word_tokenize(line) if not word in stopwords.words()]
 
 
 def stemming(line):
+    logging.info('Performing stemming')
     token_words = word_tokenize(line)
     stem_sentence = []
     for word in token_words:
@@ -57,6 +64,7 @@ def stemming(line):
 
 
 def write_to_file(list, file_name):
+    logging.info('Writing to the file')
     if not os.path.exists(OUTPUT_DIRECTORY):
         os.makedirs(OUTPUT_DIRECTORY)
     with open(OUTPUT_DIRECTORY + '/' + file_name, 'w', newline='') as f:
