@@ -14,14 +14,15 @@ SYMBOLS_REGEX = 'amp;|gt;|lt;|[=!,*)@#%(&$_?.^:;/\\\\"\'\\-]'
 DIGITS_REGEX = "[0-9]"
 MESSAGE_TYPE = "v1"
 MESSAGE_KEY = "v2"
-SPAM = 'spam'
-HAM = 'ham'
+SPAM = "spam"
+HAM = "ham"
 OUTPUT_DIRECTORY = 'output'
 INITIAL_FILE_NAME = 'data/sms-spam-corpus.csv'
 SPAM_OUTPUT_FILE = 'spam_words.csv'
 HAM_OUTPUT_FILE = 'ham_words.csv'
 
 porter = PorterStemmer()
+logging.basicConfig(format='%(asctime)s - %(message)s', level=logging.INFO)
 
 
 def csv_dict_reader(file_obj):
@@ -30,11 +31,11 @@ def csv_dict_reader(file_obj):
 
 
 def processor_line(line):
+    logging.info('Processing the line - %s', line)
     line = remove_digits(line)
     line = remove_symbols(line)
     line = line.lower()
     line = remove_stop_words(line)
-    logging.info('Processing the line')
     return str(line)
 
 
@@ -50,26 +51,23 @@ def remove_symbols(line):
 
 def remove_stop_words(line):
     logging.info('Removing stop words')
-    return [word for word in word_tokenize(line) if not word in stopwords.words()]
+    return [word for word in word_tokenize(line) if len(word) > 2 and not word in stopwords.words()]
 
 
 def stemming(line):
     logging.info('Performing stemming')
     token_words = word_tokenize(line)
-    stem_sentence = []
     for word in token_words:
-        stem_sentence.append(porter.stem(word))
-        stem_sentence.append(" ")
-    return "".join(stem_sentence)
+        porter.stem(word)
 
 
 def write_to_file(list, file_name):
     logging.info('Writing to the file')
     if not os.path.exists(OUTPUT_DIRECTORY):
         os.makedirs(OUTPUT_DIRECTORY)
-    with open(OUTPUT_DIRECTORY + '/' + file_name, 'w', newline='') as f:
+    with open(OUTPUT_DIRECTORY + '/' + file_name, 'w', newline='') as file:
         fieldnames = ['word', 'times']
-        csv_writer = csv.DictWriter(f, fieldnames=fieldnames)
+        csv_writer = csv.DictWriter(file, fieldnames=fieldnames)
         csv_writer.writeheader()
         for key, value in list:
             csv_writer.writerow({'word': key, 'times': value})
@@ -82,7 +80,7 @@ def main():
         ham_counter = Counter()
         for line in reader:
             tokenized_msg = word_tokenize(processor_line(line[MESSAGE_KEY]))
-            if line[MESSAGE_KEY] == SPAM:
+            if line[MESSAGE_TYPE] == SPAM:
                 spam_counter.update(tokenized_msg)
             else:
                 ham_counter.update(tokenized_msg)
