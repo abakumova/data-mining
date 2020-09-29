@@ -36,7 +36,7 @@ def processor_line(line):
     line = remove_symbols(line)
     line = line.lower()
     line = remove_stop_words(line)
-    return str(line)
+    return line
 
 
 def remove_digits(line):
@@ -51,7 +51,7 @@ def remove_symbols(line):
 
 def remove_stop_words(line):
     logging.info('Removing stop words')
-    return [word for word in word_tokenize(line) if len(word) > 2 and not word in stopwords.words()]
+    return [porter.stem(word) for word in word_tokenize(line) if len(word) > 2 and not word in stopwords.words()]
 
 
 def stemming(line):
@@ -79,7 +79,7 @@ def main():
         spam_counter = Counter()
         ham_counter = Counter()
         for line in reader:
-            tokenized_msg = word_tokenize(processor_line(line[MESSAGE_KEY]))
+            tokenized_msg = processor_line(line[MESSAGE_KEY])
             if line[MESSAGE_TYPE] == SPAM:
                 spam_counter.update(tokenized_msg)
             else:
