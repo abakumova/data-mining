@@ -13,16 +13,6 @@ def csv_dict_reader(file_obj):
     return csv.DictReader(file_obj, delimiter=',')
 
 
-def calculate_sum_of_word_frequency(file):
-    general_frequency = 0
-    with open(OUTPUT_DIRECTORY_WITH_DATA + '/' + file) as csv_file:
-        logging.info('Calculate sum of word frequency')
-        reader = csv_dict_reader(csv_file)
-        for line in reader:
-            general_frequency += int(line[SET_TIMES])
-    return general_frequency
-
-
 def create_statistic_dictionary(file):
     statistic_dictionary = {}
     with open(OUTPUT_DIRECTORY_WITH_DATA + '/' + file) as csv_file:
@@ -31,17 +21,6 @@ def create_statistic_dictionary(file):
         for line in reader:
             statistic_dictionary[line[SET_WORD]] = int(line[SET_TIMES])
     return statistic_dictionary
-
-
-def create_statistic_file(file, statistic_dictionary):
-    if not os.path.exists(OUTPUT_DIRECTORY):
-        os.makedirs(OUTPUT_DIRECTORY)
-    with open(OUTPUT_DIRECTORY + '/' + file, 'w', newline='') as csv_file:
-        logging.info('Write to file statistic of word frequency')
-        writer = csv.writer(csv_file)
-        writer.writerow(["word", "frequency"])
-        for key, value in statistic_dictionary.items():
-            writer.writerow([key, value])
 
 
 def words_in_set(words):
