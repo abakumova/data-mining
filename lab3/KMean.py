@@ -1,33 +1,100 @@
 from __future__ import print_function, division
-from future.utils import iteritems
-from builtins import range, input
-# from itertools import imap
 
+import math
+import random
+import matplotlib
+from builtins import range
 import numpy as np
 import matplotlib.pyplot as plt
-from sklearn.metrics.pairwise import pairwise_distances
 
 OUTPUT_DIRECTORY = 'output'
 INITIAL_FILE_NAME = 'data/s1.txt'
 
 
-def prepare_set(file):
-    data_set = {}
-    with open(file) as f:
-        for line in f:
-            (key, val) = line.split()
-            data_set[int(key)] = int(val)
-    return data_set
+def euclidean_range(x, y, centroid):
+    return math.sqrt((x - centroid[0]) ** 2 + (y - centroid[1]) ** 2)
+
+
+def action(points, x_cord, y_cord, centroids, clusters):
+    for i in range(len(points)):
+        min_distance = euclidean_range(x_cord[i], y_cord[i], centroids[0])
+        min_index = 0
+        for j in range(len(centroids)):
+            if euclidean_range(x_cord[i], y_cord[i], centroids[j]) < min_distance:
+                min_distance = euclidean_range(x_cord[i], y_cord[i], centroids[j])
+                min_index = j
+        clusters.append((min_index, points[i]))
+
+
+def show_plot(x_cord, y_cord, points, centroids, colors=None):
+    plt.axis([min(x_cord), max(x_cord), min(y_cord), max(y_cord)])
+    plt.scatter(*zip(*points), c=colors)
+    plt.scatter(*zip(*centroids), c='black', s=30)
+    plt.show()
 
 
 def main():
-    num_of_clusters = 5  # input('Enter number of clusters: ')
-    center_of_cluster = 1  # input('Enter center of cluster: ')
-    data_set = prepare_set(INITIAL_FILE_NAME)
-    print(list(data_set.keys()))
-    print(list(data_set.values()))
-    plt.scatter(list(data_set.keys()), list(data_set.values()), s=15)
-    plt.show()
+    previous_clusters = []
+    points = []
+    x_cord = []
+    y_cord = []
+    centroids = []
+    clusters = []
+
+    num_of_clusters = int(input('Enter number of clusters: '))
+    for line in open(INITIAL_FILE_NAME, "r"):
+        n1, n2 = line.split()
+        x_cord.append(int(n1))
+        y_cord.append(int(n2))
+        points.append((int(n1), int(n2)))
+
+    all_colors = matplotlib.cm.rainbow(np.linspace(0, 1, num_of_clusters))
+
+    for i in range(num_of_clusters):
+        centroids.append(
+            ((random.randint(np.min(x_cord), np.max(x_cord))), (random.randint(np.min(y_cord), np.max(y_cord)))))
+
+    show_plot(x_cord, y_cord, points, centroids)
+    action(points, x_cord, y_cord, centroids, previous_clusters)
+
+    for i in range(len(centroids)):
+        x_sum = 0
+        y_sum = 0
+        x_count = 0
+        y_count = 0
+        for key, value in previous_clusters:
+            if key == i:
+                x_sum += value[0]
+                y_sum += value[1]
+                x_count += 1
+                y_count += 1
+        centroids[i] = (x_sum / x_count, y_sum / y_count)
+
+    while True:
+        action(points, x_cord, y_cord, centroids, clusters)
+        if previous_clusters == clusters:
+            break
+
+        previous_clusters = list(clusters)
+
+        for i in range(len(centroids)):
+            x_sum = 0
+            y_sum = 0
+            count = 0
+            for key, value in clusters:
+                if key == i:
+                    x_sum += value[0]
+                    y_sum += value[1]
+                    count += 1
+            centroids[i] = (x_sum / count, y_sum / count)
+
+        clusters.clear()
+
+    color_values = []
+    for i in range(len(clusters)):
+        color_values.append(all_colors[clusters[i][0]])
+
+    show_plot(x_cord, y_cord, points, centroids, color_values)
 
 
 if __name__ == '__main__':
