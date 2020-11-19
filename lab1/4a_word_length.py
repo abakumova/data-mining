@@ -34,6 +34,9 @@ def main(file_name, msg_type):
             else:
                 w_len_dict[w_len] = count_
 
+    total_word_sum = sum(w_len_dict.values())
+    w_len_dict = {w_len[0]: w_len[1] / total_word_sum for w_len in w_len_dict.items()}
+
     plt.style.use('seaborn-bright')
     plt.title('Amount of {} words by length chart'.format(msg_type))
     words = w_len_dict.keys()
