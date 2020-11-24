@@ -27,11 +27,13 @@ def draw_chart(f_name, msg_type):
         plt.title('Top 20 {} words'.format(msg_type))
         words = words[0:20]
         words.reverse()
-        frequency = frequency[:20]
+        total_count_of_w = sum([int(frequency) for frequency in frequency])
+        frequencies = [int(frequency) / total_count_of_w for frequency in frequency[:20]]
+        # frequency = frequency[:20]
         frequency.reverse()
         x_indexes = np.arange(len(words))
         plt.xticks(x_indexes, words)
-        plt.bar(x_indexes, frequency, color='#FF1493', label='Most frequent {} words'.format(msg_type))
+        plt.bar(x_indexes, frequencies, color='#FF1493', label='Most frequent {} words'.format(msg_type))
         plt.xlabel("Words")
         plt.ylabel("Frequency")
         plt.gca().invert_xaxis()
